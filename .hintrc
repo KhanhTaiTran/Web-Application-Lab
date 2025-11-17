@@ -7,5 +7,8 @@
     "not ie 11",
     "not ios_saf <= 18.6",
     "not safari <= 18.6"
-  ]
+  ],
+  "hints": {
+    "meta-viewport": "off"
+  }
 }
