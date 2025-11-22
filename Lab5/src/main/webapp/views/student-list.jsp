@@ -122,6 +122,16 @@
             letter-spacing: 0.5px;
         }
         
+        th a {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        th a:hover {
+            text-decoration: underline;
+        }
+        
         tbody tr {
             transition: background-color 0.2s;
         }
@@ -145,6 +155,51 @@
             font-size: 64px;
             margin-bottom: 20px;
         }
+        
+        .search-box {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .search-results-message {
+            color: #666;
+            font-size: 14px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .btn-clear {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -165,6 +220,29 @@
                 ❌ ${param.error}
             </div>
         </c:if>
+
+        <!-- Search Bar -->
+        <div class="search-box">
+            <form action="student" method="get" class="search-form">
+                <input type="hidden" name="action" value="search">
+                <input type="text" 
+                       name="keyword" 
+                       class="search-input"
+                       placeholder="🔍 Search by student code, name, email, or major..." 
+                       value="${keyword}">
+                <button type="submit" class="btn btn-primary">🔍 Search</button>
+                <c:if test="${not empty keyword}">
+                    <a href="student?action=list" class="btn btn-clear">❌ Show All</a>
+                </c:if>
+            </form>
+            
+            <!-- Search Results Message -->
+            <c:if test="${not empty keyword}">
+                <div class="search-results-message">
+                    🔎 Search results for: <strong>"${keyword}"</strong>
+                </div>
+            </c:if>
+        </div>
         
         <!-- Add New Student Button -->
         <div style="margin-bottom: 20px;">
@@ -176,14 +254,67 @@
         <!-- Student Table -->
         <c:choose>
             <c:when test="${not empty students}">
+                <div>
+                    <form action="student" method="get">
+                        <input type="hidden" name="action" value="filter">
+                        <label>Filter by Major:</label>
+                        <select name="major" >
+                            <option value="All Majors" ${selectedMajor == 'All Majors' ? 'selected' : ''}>All Majors</option>
+                            <option value="Computer Science" ${selectedMajor == 'Computer Science' ? 'selected' : ''}>Computer Science</option>
+                            <option value="Information Technology" ${selectedMajor == 'Information Technology' ? 'selected' : ''}>Information Technology</option>
+                            <option value="Software Engineering" ${selectedMajor == 'Software Engineering' ? 'selected' : ''}>Software Engineering</option>
+                            <option value="Business Administration" ${selectedMajor == 'Business Administration' ? 'selected' : ''}>Business Administration</option>
+                        </select>
+                        <button type="submit">Apply</button>
+                        <c:if test="${not empty selectedMajor}">
+                            <a href="student?action=list">Clear Filter</a>
+                            <p>Currently filtering by: <strong>${selectedMajor}</strong></p>
+                        </c:if>
+                    </form>
+                </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Student Code</th>
-                            <th>Full Name</th>
-                            <th>Email</th>
-                            <th>Major</th>
+                            <th>
+                                <a href="student?action=sort&sortBy=id&order=${sortBy == 'id' && order == 'asc' ? 'desc' : 'asc'}">
+                                    ID
+                                </a>
+                                <c:if test="${sortBy == 'id'}">
+                                    ${order == 'asc' ? '▲' : '▼'}
+                                </c:if>
+                            </th>
+                            <th>
+                                <a href="student?action=sort&sortBy=student_code&order=${sortBy == 'student_code' && order == 'asc' ? 'desc' : 'asc'}">
+                                    Student Code
+                                </a>
+                                <c:if test="${sortBy == 'student_code'}">
+                                    ${order == 'asc' ? '▲' : '▼'}
+                                </c:if>
+                            </th>
+                            <th>
+                                <a href="student?action=sort&sortBy=full_name&order=${sortBy == 'full_name' && order == 'asc' ? 'desc' : 'asc'}">
+                                    Full Name
+                                </a>
+                                <c:if test="${sortBy == 'full_name'}">
+                                    ${order == 'asc' ? '▲' : '▼'}
+                                </c:if>
+                            </th>
+                            <th>
+                                <a href="student?action=sort&sortBy=email&order=${sortBy == 'email' && order == 'asc' ? 'desc' : 'asc'}">
+                                    Email
+                                </a>
+                                <c:if test="${sortBy == 'email'}">
+                                    ${order == 'asc' ? '▲' : '▼'}
+                                </c:if>
+                            </th>
+                            <th>
+                                <a href="student?action=sort&sortBy=major&order=${sortBy == 'major' && order == 'asc' ? 'desc' : 'asc'}">
+                                    Major
+                                </a>
+                                <c:if test="${sortBy == 'major'}">
+                                    ${order == 'asc' ? '▲' : '▼'}
+                                </c:if>
+                            </th>
                             <th>Actions</th>
                         </tr>
                     </thead>

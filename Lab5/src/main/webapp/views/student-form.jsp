@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
         <c:choose>
-            <c:when test="${student != null}">Edit Student</c:when>
+            <c:when test="${formMode == 'update'}">Edit Student</c:when>
             <c:otherwise>Add New Student</c:otherwise>
         </c:choose>
     </title>
@@ -121,13 +121,20 @@
             color: #666;
             margin-top: 5px;
         }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>
             <c:choose>
-                <c:when test="${student != null}">
+                <c:when test="${formMode == 'update'}">
                     ✏️ Edit Student
                 </c:when>
                 <c:otherwise>
@@ -139,10 +146,10 @@
         <form action="student" method="POST">
             <!-- Hidden field for action -->
             <input type="hidden" name="action" 
-                   value="${student != null ? 'update' : 'insert'}">
+                   value="${formMode == 'update' ? 'update' : 'insert'}">
             
             <!-- Hidden field for ID (only for update) -->
-            <c:if test="${student != null}">
+            <c:if test="${formMode == 'update'}">
                 <input type="hidden" name="id" value="${student.id}">
             </c:if>
             
@@ -155,9 +162,11 @@
                        id="studentCode" 
                        name="studentCode" 
                        value="${student.studentCode}"
-                       ${student != null ? 'readonly' : 'required'}
+                       ${formMode == 'update' ? 'readonly' : 'required'}
                        placeholder="e.g., SV001, IT123">
-                <p class="info-text">Format: 2 letters + 3+ digits</p>
+                <c:if test="${not empty errorCode}">
+                    <span class="error">${errorCode}</span>
+                </c:if>
             </div>
             
             <!-- Full Name -->
@@ -171,6 +180,10 @@
                        value="${student.fullName}"
                        required
                        placeholder="Enter full name">
+
+                <c:if test="${not empty errorName}">
+                    <span class="error">${errorName}</span>
+                </c:if>
             </div>
             
             <!-- Email -->
@@ -184,6 +197,10 @@
                        value="${student.email}"
                        required
                        placeholder="student@example.com">
+
+                <c:if test="${not empty errorEmail}">
+                    <span class="error">${errorEmail}</span>
+                </c:if>
             </div>
             
             <!-- Major -->
@@ -210,13 +227,16 @@
                         Business Administration
                     </option>
                 </select>
+                <c:if test="${not empty errorMajor}">
+                    <span class="error">${errorMajor}</span>
+                </c:if>
             </div>
             
             <!-- Buttons -->
             <div class="button-group">
                 <button type="submit" class="btn btn-primary">
                     <c:choose>
-                        <c:when test="${student != null}">
+                        <c:when test="${formMode == 'update'}">
                             💾 Update Student
                         </c:when>
                         <c:otherwise>

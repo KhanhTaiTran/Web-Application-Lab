@@ -137,11 +137,112 @@ public class StudentDAO {
         }
     }
 
+    // Search students by keyword
+    public List<Student> searchStudents(String keyword) {
+        List<Student> students = new ArrayList<>();
+        String sql = "SELECT * FROM students WHERE student_code LIKE ? OR full_name LIKE ? OR email LIKE ? ORDER BY id DESC";
+
+        try (Connection conn = getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            String searchPattern = "%" + keyword + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            pstmt.setString(3, searchPattern);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Student student = new Student();
+                student.setId(rs.getInt("id"));
+                student.setStudentCode(rs.getString("student_code"));
+                student.setFullName(rs.getString("full_name"));
+                student.setEmail(rs.getString("email"));
+                student.setMajor(rs.getString("major"));
+                student.setCreatedAt(rs.getTimestamp("created_at"));
+                students.add(student);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
+    }
+
+    public List<Student> getStudentsSorted(String sortBy, String order) {
+        // Validate sortBy parameter
+        List<String> validColumns = List.of("id", "student_code", "full_name", "email", "major");
+        if (sortBy == null || !validColumns.contains(sortBy.toLowerCase())) {
+            sortBy = "id";
+        }
+
+        // Validate order parameter
+        if (order == null || (!order.equalsIgnoreCase("asc") && !order.equalsIgnoreCase("desc"))) {
+            order = "asc";
+        }
+
+        String sql = "SELECT * FROM students ORDER BY " + sortBy + " " + order;
+        List<Student> students = new ArrayList<>();
+
+        try (Connection conn = getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Student student = new Student();
+                student.setId(rs.getInt("id"));
+                student.setStudentCode(rs.getString("student_code"));
+                student.setFullName(rs.getString("full_name"));
+                student.setEmail(rs.getString("email"));
+                student.setMajor(rs.getString("major"));
+                student.setCreatedAt(rs.getTimestamp("created_at"));
+                students.add(student);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
+    }
+
+    public List<Student> getStudentsFiltered(String major, String sortBy, String order) {
+        String sql = "SELECT * FROM students WHERE major = ? ORDER BY id DESC";
+        List<Student> students = new ArrayList<>();
+
+        if (major == null || major.isEmpty() || major.equals("All Majors")) {
+            return getAllStudents();
+        }
+        try (Connection conn = getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, major);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Student student = new Student();
+                student.setId(rs.getInt("id"));
+                student.setStudentCode(rs.getString("student_code"));
+                student.setFullName(rs.getString("full_name"));
+                student.setEmail(rs.getString("email"));
+                student.setMajor(rs.getString("major"));
+                student.setCreatedAt(rs.getTimestamp("created_at"));
+                students.add(student);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return students;
+    }
+
     // Add this main method to test (remove after testing)
     public static void main(String[] args) {
         StudentDAO dao = new StudentDAO();
-        List<Student> students = dao.getAllStudents();
-        for (Student s : students) {
+        List<Student> results = dao.searchStudents("SV");
+        System.out.println("Found " + results.size() + " students");
+        for (Student s : results) {
             System.out.println(s);
         }
     }
