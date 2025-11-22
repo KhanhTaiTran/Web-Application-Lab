@@ -170,6 +170,66 @@ public class StudentDAO {
         return students;
     }
 
+    // Search students with pagination
+    public List<Student> searchStudentsPaginated(String keyword, int offset, int limit) {
+        List<Student> students = new ArrayList<>();
+        String sql = "SELECT * FROM students WHERE student_code LIKE ? OR full_name LIKE ? OR email LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?";
+
+        try (Connection conn = getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            String searchPattern = "%" + keyword + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            pstmt.setString(3, searchPattern);
+            pstmt.setInt(4, limit);
+            pstmt.setInt(5, offset);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Student student = new Student();
+                student.setId(rs.getInt("id"));
+                student.setStudentCode(rs.getString("student_code"));
+                student.setFullName(rs.getString("full_name"));
+                student.setEmail(rs.getString("email"));
+                student.setMajor(rs.getString("major"));
+                student.setCreatedAt(rs.getTimestamp("created_at"));
+                students.add(student);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
+    }
+
+    // Get total count of search results
+    public int getTotalSearchResults(String keyword) {
+        String sql = "SELECT COUNT(*) FROM students WHERE student_code LIKE ? OR full_name LIKE ? OR email LIKE ?";
+
+        try (Connection conn = getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            String searchPattern = "%" + keyword + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            pstmt.setString(3, searchPattern);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
     public List<Student> getStudentsSorted(String sortBy, String order) {
         // Validate sortBy parameter
         List<String> validColumns = List.of("id", "student_code", "full_name", "email", "major");
@@ -235,6 +295,167 @@ public class StudentDAO {
             e.printStackTrace();
         }
         return students;
+    }
+
+    public int getTotalStudent() {
+        String sql = "SELECT COUNT(*) AS total FROM students";
+        int total = 0;
+
+        try (Connection conn = getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                total = rs.getInt("total");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return total;
+    }
+
+    public List<Student> getStudentsPaginated(int offset, int limit) {
+        List<Student> students = new ArrayList<>();
+        String sql = "SELECT * FROM students ORDER BY id DESC LIMIT ? OFFSET ?";
+
+        try (Connection conn = getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, limit);
+            pstmt.setInt(2, offset);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Student student = new Student();
+                student.setId(rs.getInt("id"));
+                student.setStudentCode(rs.getString("student_code"));
+                student.setFullName(rs.getString("full_name"));
+                student.setEmail(rs.getString("email"));
+                student.setMajor(rs.getString("major"));
+                student.setCreatedAt(rs.getTimestamp("created_at"));
+                students.add(student);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
+    }
+
+    // Get sorted students with pagination
+    public List<Student> getStudentsSortedPaginated(String sortBy, String order, int offset, int limit) {
+        List<Student> students = new ArrayList<>();
+
+        // Validate sortBy to prevent SQL injection
+        String[] validColumns = { "id", "student_code", "full_name", "email", "major" };
+        boolean isValidColumn = false;
+        for (String col : validColumns) {
+            if (col.equals(sortBy)) {
+                isValidColumn = true;
+                break;
+            }
+        }
+        if (!isValidColumn) {
+            sortBy = "id";
+        }
+
+        // Validate order
+        if (!"asc".equalsIgnoreCase(order) && !"desc".equalsIgnoreCase(order)) {
+            order = "asc";
+        }
+
+        String sql = "SELECT * FROM students ORDER BY " + sortBy + " " + order + " LIMIT ? OFFSET ?";
+
+        try (Connection conn = getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, limit);
+            pstmt.setInt(2, offset);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Student student = new Student();
+                student.setId(rs.getInt("id"));
+                student.setStudentCode(rs.getString("student_code"));
+                student.setFullName(rs.getString("full_name"));
+                student.setEmail(rs.getString("email"));
+                student.setMajor(rs.getString("major"));
+                student.setCreatedAt(rs.getTimestamp("created_at"));
+                students.add(student);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
+    }
+
+    // Get filtered students with pagination
+    public List<Student> getStudentsFilteredPaginated(String major, int offset, int limit) {
+        List<Student> students = new ArrayList<>();
+        String sql;
+
+        if (major == null || major.equals("All Majors")) {
+            sql = "SELECT * FROM students ORDER BY id DESC LIMIT ? OFFSET ?";
+        } else {
+            sql = "SELECT * FROM students WHERE major = ? ORDER BY id DESC LIMIT ? OFFSET ?";
+        }
+
+        try (Connection conn = getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            if (major == null || major.equals("All Majors")) {
+                pstmt.setInt(1, limit);
+                pstmt.setInt(2, offset);
+            } else {
+                pstmt.setString(1, major);
+                pstmt.setInt(2, limit);
+                pstmt.setInt(3, offset);
+            }
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Student student = new Student();
+                student.setId(rs.getInt("id"));
+                student.setStudentCode(rs.getString("student_code"));
+                student.setFullName(rs.getString("full_name"));
+                student.setEmail(rs.getString("email"));
+                student.setMajor(rs.getString("major"));
+                student.setCreatedAt(rs.getTimestamp("created_at"));
+                students.add(student);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
+    }
+
+    // Get total students count by major
+    public int getTotalStudentsByMajor(String major) {
+        String sql = "SELECT COUNT(*) FROM students WHERE major = ?";
+
+        try (Connection conn = getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, major);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 
     // Add this main method to test (remove after testing)

@@ -74,11 +74,23 @@ public class StudentController extends HttpServlet {
         }
     }
 
-    // List all students
+    // List students
     private void listStudents(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        List<Student> students = studentDAO.getAllStudents();
+        String pageParam = request.getParameter("page");
+        int currentPage = (pageParam != null) ? Integer.parseInt(pageParam) : 1;
+
+        int recordsPerPage = 10;
+
+        int offset = (currentPage - 1) * recordsPerPage;
+
+        List<Student> students = studentDAO.getStudentsPaginated(offset, recordsPerPage);
+
+        int totalRecords = studentDAO.getTotalStudent();
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
         request.setAttribute("students", students);
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("/views/student-list.jsp");
@@ -187,18 +199,31 @@ public class StudentController extends HttpServlet {
             throws ServletException, IOException {
 
         String keyword = request.getParameter("keyword");
+        String pageParam = request.getParameter("page");
+        int currentPage = (pageParam != null) ? Integer.parseInt(pageParam) : 1;
+
+        int recordsPerPage = 10;
+        int offset = (currentPage - 1) * recordsPerPage;
+
         List<Student> students;
+        int totalRecords;
 
         // Handle null or empty keyword - show all students
         if (keyword == null || keyword.trim().isEmpty()) {
-            students = studentDAO.getAllStudents();
+            students = studentDAO.getStudentsPaginated(offset, recordsPerPage);
+            totalRecords = studentDAO.getTotalStudent();
         } else {
-            students = studentDAO.searchStudents(keyword.trim());
+            students = studentDAO.searchStudentsPaginated(keyword.trim(), offset, recordsPerPage);
+            totalRecords = studentDAO.getTotalSearchResults(keyword.trim());
         }
+
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
 
         // Set both students list and keyword as attributes
         request.setAttribute("students", students);
         request.setAttribute("keyword", keyword);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("/views/student-list.jsp");
         dispatcher.forward(request, response);
@@ -250,13 +275,23 @@ public class StudentController extends HttpServlet {
             throws ServletException, IOException {
         String sortBy = request.getParameter("sortBy");
         String order = request.getParameter("order");
+        String pageParam = request.getParameter("page");
+        int currentPage = (pageParam != null) ? Integer.parseInt(pageParam) : 1;
 
-        List<Student> students = studentDAO.getStudentsSorted(sortBy, order);
+        int recordsPerPage = 10;
+        int offset = (currentPage - 1) * recordsPerPage;
 
-        // Set attributes so JSP can display sort indicators
+        // Get paginated sorted students
+        List<Student> students = studentDAO.getStudentsSortedPaginated(sortBy, order, offset, recordsPerPage);
+        int totalRecords = studentDAO.getTotalStudent();
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+
+        // Set attributes so JSP can display sort indicators and pagination
         request.setAttribute("students", students);
         request.setAttribute("sortBy", sortBy);
         request.setAttribute("order", order);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("/views/student-list.jsp");
         dispatcher.forward(request, response);
@@ -265,8 +300,23 @@ public class StudentController extends HttpServlet {
     private void filterStudents(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String major = request.getParameter("major");
-        List<Student> students = studentDAO.getStudentsFiltered(major, null, null);
+        String pageParam = request.getParameter("page");
+        int currentPage = (pageParam != null) ? Integer.parseInt(pageParam) : 1;
+
+        int recordsPerPage = 10;
+        int offset = (currentPage - 1) * recordsPerPage;
+
+        // Get paginated filtered students
+        List<Student> students = studentDAO.getStudentsFilteredPaginated(major, offset, recordsPerPage);
+        int totalRecords = (major == null || major.equals("All Majors"))
+                ? studentDAO.getTotalStudent()
+                : studentDAO.getTotalStudentsByMajor(major);
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+
         request.setAttribute("students", students);
+        request.setAttribute("selectedMajor", major);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("/views/student-list.jsp");
         dispatcher.forward(request, response);

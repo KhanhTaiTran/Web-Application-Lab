@@ -200,6 +200,25 @@
         .btn-clear:hover {
             background-color: #5a6268;
         }
+
+        .pagination {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .pagination a {
+            padding: 8px 12px;
+            margin: 0 4px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+        }
+        .pagination strong {
+            padding: 8px 12px;
+            margin: 0 4px;
+            background-color: #4CAF50;
+            color: white;
+            border: 1px solid #4CAF50;
+        }
     </style>
 </head>
 <body>
@@ -342,6 +361,29 @@
                         </c:forEach>
                     </tbody>
                 </table>
+                <div class="pagination">
+                    <!--Prev button-->
+                    <c:if test="${currentPage > 1}">
+                        <a href="student?action=${not empty sortBy ? 'sort' : (not empty selectedMajor ? 'filter' : (not empty keyword ? 'search' : 'list'))}&page=${currentPage - 1}<c:if test='${not empty sortBy}'>&sortBy=${sortBy}&order=${order}</c:if><c:if test='${not empty selectedMajor}'>&major=${selectedMajor}</c:if><c:if test='${not empty keyword}'>&keyword=${keyword}</c:if>" class="btn btn-secondary">« Prev</a>
+                    </c:if>
+
+                    <!--Page numbers-->
+                    <c:forEach begin="1" end="${totalPages}" var="i">
+                        <c:choose>
+                            <c:when test="${i == currentPage}">
+                                <strong>${i}</strong>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="student?action=${not empty sortBy ? 'sort' : (not empty selectedMajor ? 'filter' : (not empty keyword ? 'search' : 'list'))}&page=${i}<c:if test='${not empty sortBy}'>&sortBy=${sortBy}&order=${order}</c:if><c:if test='${not empty selectedMajor}'>&major=${selectedMajor}</c:if><c:if test='${not empty keyword}'>&keyword=${keyword}</c:if>">${i}</a>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+                    <!--Next button-->
+                    <c:if test="${currentPage < totalPages}">
+                        <a href="student?action=${not empty sortBy ? 'sort' : (not empty selectedMajor ? 'filter' : (not empty keyword ? 'search' : 'list'))}&page=${currentPage + 1}<c:if test='${not empty sortBy}'>&sortBy=${sortBy}&order=${order}</c:if><c:if test='${not empty selectedMajor}'>&major=${selectedMajor}</c:if><c:if test='${not empty keyword}'>&keyword=${keyword}</c:if>" class="btn btn-secondary">Next »</a>
+                    </c:if>
+                </div>
+                <p>Showing page ${currentPage} of ${totalPages}</p>
             </c:when>
             <c:otherwise>
                 <div class="empty-state">
