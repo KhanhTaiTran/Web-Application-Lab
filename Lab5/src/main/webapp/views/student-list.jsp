@@ -264,9 +264,12 @@
         </div>
         
         <!-- Add New Student Button -->
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 20px; display: flex; gap: 10px;">
             <a href="student?action=new" class="btn btn-primary">
                 ➕ Add New Student
+            </a>
+            <a href="export" class="btn btn-secondary" style="background-color: #28a745;">
+                📥 Export to Excel
             </a>
         </div>
         
