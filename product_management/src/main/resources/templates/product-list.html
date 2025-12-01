@@ -173,9 +173,11 @@
           th:action="@{/products/advanced-search}"
           method="get"
           class="search-form"
+          style="flex-wrap: wrap; gap: 10px"
         >
           <input type="text" name="name" placeholder="Name" />
           <input type="text" name="category" placeholder="Category" />
+          <br />
           <input
             type="number"
             step="0.01"
@@ -191,6 +193,27 @@
           <button type="submit" class="btn btn-primary">
             🔍 Advanced Search
           </button>
+        </form>
+
+        <form
+          th:action="@{/products}"
+          method="get"
+          style="display: flex; gap: 10px"
+        >
+          <select
+            title="Select Categories"
+            name="category"
+            onchange="this.form.submit()"
+            style="padding: 10px; border: 1px solid #ddd; border-radius: 5px"
+          >
+            <option value="">All Categories</option>
+            <option
+              th:each="cat : ${categories}"
+              th:value="${cat}"
+              th:text="${cat}"
+              th:selected="${cat == selectedCategory}"
+            ></option>
+          </select>
         </form>
       </div>
 

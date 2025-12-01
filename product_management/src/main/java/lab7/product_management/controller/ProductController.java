@@ -23,9 +23,21 @@ public class ProductController {
 
     // List all products
     @GetMapping
-    public String listProducts(Model model) {
-        List<Product> products = productService.getAllProducts();
+    public String listProducts(@RequestParam(required = false) String category, Model model) {
+        List<Product> products;
+
+        if (category != null && !category.trim().isEmpty()) {
+            products = productService.getProductsByCategory(category);
+            model.addAttribute("selectedCategory", category);
+        } else {
+            products = productService.getAllProducts();
+        }
+
+        List<String> categories = productService.getAllCategories();
+
         model.addAttribute("products", products);
+        model.addAttribute("categories", categories);
+
         return "product-list"; // return to product-list.html
     }
 
@@ -79,6 +91,10 @@ public class ProductController {
     @GetMapping("/search")
     public String searchProducts(@RequestParam("keyword") String keyword, Model model) {
         List<Product> products = productService.searchProducts(keyword);
+
+        List<String> categories = productService.getAllCategories();
+        model.addAttribute("categories", categories);
+
         model.addAttribute("products", products);
         model.addAttribute("keyword", keyword);
         return "product-list";
@@ -92,6 +108,10 @@ public class ProductController {
             @RequestParam(required = false) BigDecimal maxPrice,
             Model model) {
         List<Product> products = productService.advancedSearch(name, category, minPrice, maxPrice);
+
+        List<String> categories = productService.getAllCategories();
+        model.addAttribute("categories", categories);
+
         model.addAttribute("products", products);
         model.addAttribute("name", name);
         model.addAttribute("category", category);

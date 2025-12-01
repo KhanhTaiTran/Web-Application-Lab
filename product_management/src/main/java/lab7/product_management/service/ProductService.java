@@ -21,4 +21,6 @@ public interface ProductService {
 
     List<Product> advancedSearch(String name, String category, BigDecimal minPrice,
             BigDecimal maxPrice);
+
+    List<String> getAllCategories();
 }

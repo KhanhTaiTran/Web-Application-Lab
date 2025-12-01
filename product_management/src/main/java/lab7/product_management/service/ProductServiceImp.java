@@ -76,4 +76,9 @@ public class ProductServiceImp implements ProductService {
 
         return productRepository.searchProducts(namePattern, categoryPattern, minPrice, maxPrice);
     }
+
+    @Override
+    public List<String> getAllCategories() {
+        return productRepository.findAllCategories();
+    }
 }
