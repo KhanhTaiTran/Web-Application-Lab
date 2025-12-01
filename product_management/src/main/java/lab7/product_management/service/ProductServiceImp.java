@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
 
 @Service
 @Transactional
@@ -47,5 +48,32 @@ public class ProductServiceImp implements ProductService {
     @Override
     public List<Product> getProductsByCategory(String category) {
         return productRepository.findByCategory(category);
+    }
+
+    @Override
+    public List<Product> advancedSearch(String name, String category, BigDecimal minPrice,
+            BigDecimal maxPrice) {
+        // convert empty string to null
+        name = (name != null && name.trim().isEmpty()) ? null : name;
+        category = (category != null && category.trim().isEmpty()) ? null : category;
+
+        // if all parameters are null, return all products
+        if (name == null && category == null && minPrice == null && maxPrice == null) {
+            return productRepository.findAll();
+        }
+
+        // build dynamic query
+        if (minPrice == null) {
+            minPrice = BigDecimal.ZERO;
+        }
+        if (maxPrice == null) {
+            maxPrice = BigDecimal.valueOf(Double.MAX_VALUE);
+        }
+
+        // use flexible search
+        String namePattern = (name != null) ? "%" + name + "%" : "%";
+        String categoryPattern = (category != null) ? "%" + category + "%" : "%";
+
+        return productRepository.searchProducts(namePattern, categoryPattern, minPrice, maxPrice);
     }
 }

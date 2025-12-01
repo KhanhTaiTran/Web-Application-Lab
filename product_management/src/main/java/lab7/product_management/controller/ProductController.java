@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.math.BigDecimal;
 
 @Controller
 @RequestMapping("/products")
@@ -80,6 +81,24 @@ public class ProductController {
         List<Product> products = productService.searchProducts(keyword);
         model.addAttribute("products", products);
         model.addAttribute("keyword", keyword);
+        return "product-list";
+    }
+
+    @GetMapping("/advanced-search")
+    public String advancedSearch(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            Model model) {
+        List<Product> products = productService.advancedSearch(name, category, minPrice, maxPrice);
+        model.addAttribute("products", products);
+        model.addAttribute("name", name);
+        model.addAttribute("category", category);
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
+        model.addAttribute("keyword", name != null ? name : "");
+
         return "product-list";
     }
 }
