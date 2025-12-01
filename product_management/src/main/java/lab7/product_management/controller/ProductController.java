@@ -4,10 +4,12 @@ import lab7.product_management.service.ProductService;
 import lab7.product_management.entity.Product;
 
 import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.math.BigDecimal;
@@ -89,14 +91,23 @@ public class ProductController {
 
     // Search products
     @GetMapping("/search")
-    public String searchProducts(@RequestParam("keyword") String keyword, Model model) {
-        List<Product> products = productService.searchProducts(keyword);
+    public String searchProducts(@RequestParam("keyword") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Product> productPage = productService.searchProductsWithPage(keyword, pageable);
 
         List<String> categories = productService.getAllCategories();
-        model.addAttribute("categories", categories);
 
-        model.addAttribute("products", products);
+        model.addAttribute("categories", categories);
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("keyword", keyword);
+        model.addAttribute("totalItems", productPage.getTotalElements());
+
         return "product-list";
     }
 

@@ -262,6 +262,68 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination Controls -->
+        <div
+          th:if="${totalPages > 1}"
+          style="margin-top: 20px; text-align: center"
+        >
+          <div style="display: inline-flex; gap: 5px; align-items: center">
+            <!-- Previous Button -->
+            <a
+              th:if="${currentPage > 0}"
+              th:href="@{/products/search(keyword=${keyword}, page=${currentPage - 1}, size=10)}"
+              class="btn btn-sm btn-primary"
+            >
+              ← Previous
+            </a>
+
+            <!-- Page Numbers -->
+            <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+              <a
+                th:if="${i == currentPage}"
+                style="
+                  padding: 5px 10px;
+                  background: #667eea;
+                  color: white;
+                  border-radius: 3px;
+                  text-decoration: none;
+                  font-weight: bold;
+                "
+              >
+                [[${i + 1}]]
+              </a>
+              <a
+                th:unless="${i == currentPage}"
+                th:href="@{/products/search(keyword=${keyword}, page=${i}, size=10)}"
+                style="
+                  padding: 5px 10px;
+                  background: #f5f5f5;
+                  color: #333;
+                  border-radius: 3px;
+                  text-decoration: none;
+                "
+              >
+                [[${i + 1}]]
+              </a>
+            </span>
+
+            <!-- Next Button -->
+            <a
+              th:if="${currentPage < totalPages - 1}"
+              th:href="@{/products/search(keyword=${keyword}, page=${currentPage + 1}, size=10)}"
+              class="btn btn-sm btn-primary"
+            >
+              Next →
+            </a>
+          </div>
+
+          <!-- Info -->
+          <p style="margin-top: 10px; color: #666">
+            Page [[${currentPage + 1}]] of [[${totalPages}]] (Total:
+            [[${totalItems}]] products)
+          </p>
+        </div>
       </div>
 
       <!-- Empty State -->

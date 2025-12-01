@@ -4,6 +4,10 @@ import lab7.product_management.entity.Product;
 
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+
 import java.math.BigDecimal;
 
 public interface ProductService {
@@ -16,6 +20,8 @@ public interface ProductService {
     void deleteProduct(Long id);
 
     List<Product> searchProducts(String keyword);
+
+    Page<Product> searchProductsWithPage(String keyword, Pageable pageable);
 
     List<Product> getProductsByCategory(String category);
 
