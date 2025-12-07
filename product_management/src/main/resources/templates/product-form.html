@@ -93,6 +93,13 @@
         display: flex;
         justify-content: center;
       }
+      .error {
+        border-color: red;
+      }
+      .error-message {
+        color: red;
+        font-size: 12px;
+      }
     </style>
   </head>
   <body>
@@ -113,9 +120,14 @@
             type="text"
             id="productCode"
             th:field="*{productCode}"
-            placeholder="Enter product code (e.g., P001)"
-            required
+            th:errorclass="error"
           />
+          <span
+            th:if="${#fields.hasErrors('productCode')}"
+            th:errors="*{productCode}"
+            class="error-message"
+            >Error</span
+          >
         </div>
 
         <div class="form-group">
@@ -125,8 +137,14 @@
             id="name"
             th:field="*{name}"
             placeholder="Enter product name"
-            required
+            th:errorclass="error"
           />
+          <span
+            th:if="${#fields.hasErrors('name')}"
+            th:errors="*{name}"
+            class="error-message"
+            >Error</span
+          >
         </div>
 
         <div class="form-group">
@@ -135,11 +153,15 @@
             type="number"
             id="price"
             th:field="*{price}"
-            step="0.01"
-            min="0"
+            th:errorclass="error"
             placeholder="0.00"
-            required
           />
+          <span
+            th:if="${#fields.hasErrors('price')}"
+            th:errors="*{price}"
+            class="error-message"
+            >Error</span
+          >
         </div>
 
         <div class="form-group">
@@ -148,10 +170,15 @@
             type="number"
             id="quantity"
             th:field="*{quantity}"
-            min="0"
             placeholder="0"
-            required
+            th:errorclass="error"
           />
+          <span
+            th:if="${#fields.hasErrors('quantity')}"
+            th:errors="*{quantity}"
+            class="error-message"
+            >Error</span
+          >
         </div>
 
         <div class="form-group">
