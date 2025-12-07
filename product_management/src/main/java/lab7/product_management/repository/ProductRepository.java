@@ -38,4 +38,19 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
         @Query("SELECT DISTINCT p.category FROM Product p ORDER BY p.category")
         List<String> findAllCategories();
+
+        @Query("SELECT COUNT(p) FROM Product p WHERE p.category = :category")
+        long countByCategory(@Param("category") String category);
+
+        @Query("SELECT SUM(p.price * p.quantity) FROM Product p")
+        BigDecimal calculateTotalValue();
+
+        @Query("SELECT AVG(p.price) FROM Product p")
+        BigDecimal calculateAveragePrice();
+
+        List<Product> findTop5ByOrderByIdDesc();
+
+        @Query("SELECT p FROM Product p WHERE p.quantity < :threshold")
+        List<Product> findLowStockProducts(@Param("threshold") int threshold);
+
 }

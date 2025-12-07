@@ -34,4 +34,16 @@ public interface ProductService {
             BigDecimal maxPrice, Pageable pageable);
 
     List<String> getAllCategories();
+
+    long getCountByCategory(String category);
+
+    BigDecimal getTotalValue();
+
+    BigDecimal getAveragePrice();
+
+    List<Product> getLowStockProducts(int threshold);
+
+    List<Product> getRecentProducts();
+
+    long getTotalProductsCount();
 }

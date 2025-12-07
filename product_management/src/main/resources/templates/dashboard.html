@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+  <head>
+    <title>Statistics Dashboard</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --primary-color: #3498db;
+        --success-color: #27ae60;
+        --warning-color: #f1c40f;
+        --danger-color: #e74c3c;
+        --text-color: #2c3e50;
+        --bg-color: #f4f6f9;
+        --card-bg: #ffffff;
+        --border-color: #e0e0e0;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: var(--text-color);
+        font-weight: 300;
+      }
+
+      /* --- Grid Layouts --- */
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .grid-sidebar-main {
+        display: grid;
+        grid-template-columns: 1fr 2fr; /* 1 phần bên trái, 2 phần bên phải */
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      /* Responsive cho grid lệch (sidebar-main) */
+      @media (max-width: 900px) {
+        .grid-sidebar-main {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* --- Cards --- */
+      .card {
+        background: var(--card-bg);
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--border-color);
+      }
+
+      .card-header {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--bg-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* Metric Cards Styling */
+      .stat-card {
+        border-left: 5px solid transparent;
+        transition: transform 0.2s ease;
+      }
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      .stat-card.primary {
+        border-left-color: var(--primary-color);
+      }
+      .stat-card.success {
+        border-left-color: var(--success-color);
+      }
+      .stat-card.info {
+        border-left-color: #17a2b8;
+      }
+
+      .stat-label {
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-top: 5px;
+      }
+      .text-primary {
+        color: var(--primary-color);
+      }
+      .text-success {
+        color: var(--success-color);
+      }
+      .text-info {
+        color: #17a2b8;
+      }
+
+      /* --- List Styles --- */
+      .list-group {
+        list-style: none;
+      }
+      .list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--bg-color);
+      }
+      .list-item:last-child {
+        border-bottom: none;
+      }
+      .badge {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+      }
+      .badge.danger {
+        background-color: var(--danger-color);
+      }
+
+      /* --- Tables --- */
+      .table-wrapper {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--border-color);
+      }
+      th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #555;
+      }
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+      .text-danger {
+        color: var(--danger-color);
+        font-weight: bold;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .text-muted {
+        color: #95a5a6;
+      }
+
+      /* --- Alert Card Specifics --- */
+      .card.alert-card {
+        border-color: #fadbd8;
+      }
+      .card.alert-card .card-header {
+        background-color: var(--danger-color);
+        color: white;
+        margin: -20px -20px 15px -20px; /* Pull header out to edges */
+        padding: 15px 20px;
+        border-radius: 8px 8px 0 0;
+        border-bottom: none;
+      }
+      .card.alert-card .badge {
+        background-color: white;
+        color: var(--danger-color);
+      }
+
+      /* --- Buttons --- */
+      .btn-back {
+        display: inline-block;
+        margin-top: 30px;
+        padding: 10px 20px;
+        background-color: transparent;
+        border: 2px solid #95a5a6;
+        color: #7f8c8d;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+      }
+      .btn-back:hover {
+        background-color: #95a5a6;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📊 Product Statistics Dashboard</h1>
+
+      <!-- SECTION 1: KEY METRICS (Overview) -->
+      <div class="grid-3">
+        <!-- Total Products -->
+        <div class="card stat-card primary">
+          <span class="stat-label">Total Products</span>
+          <div class="stat-value text-primary" th:text="${totalCount}">0</div>
+        </div>
+
+        <!-- Total Value -->
+        <div class="card stat-card success">
+          <span class="stat-label">Total Inventory Value</span>
+          <div
+            class="stat-value text-success"
+            th:text="${'$' + #numbers.formatDecimal(totalValue, 1, 'COMMA', 2, 'POINT')}"
+          >
+            $0.00
+          </div>
+        </div>
+
+        <!-- Average Price -->
+        <div class="card stat-card info">
+          <span class="stat-label">Average Price</span>
+          <div
+            class="stat-value text-info"
+            th:text="${'$' + #numbers.formatDecimal(avgPrice, 1, 'COMMA', 2, 'POINT')}"
+          >
+            $0.00
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2 & 3: CATEGORIES AND ALERTS -->
+      <div class="grid-sidebar-main">
+        <!-- SECTION 2: CATEGORY STATISTICS -->
+        <div class="card">
+          <div class="card-header">Products by Category</div>
+          <ul class="list-group">
+            <li class="list-item" th:each="entry : ${categoryStats}">
+              <span th:text="${entry.key}">Category Name</span>
+              <span class="badge" th:text="${entry.value}">0</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- SECTION 3: LOW STOCK ALERTS -->
+        <div class="card alert-card">
+          <div class="card-header">
+            <span>⚠️ Low Stock Alerts (Qty < 10)</span>
+            <span class="badge" th:text="${lowStockProducts.size()}">0</span>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:if="${lowStockProducts.empty}">
+                  <td colspan="4" class="text-center text-muted">
+                    No low stock alerts.
+                  </td>
+                </tr>
+                <tr th:each="prod : ${lowStockProducts}">
+                  <td th:text="${prod.name}">Name</td>
+                  <td th:text="${prod.category}">Cat</td>
+                  <td th:text="${prod.price}">0.0</td>
+                  <td class="text-danger" th:text="${prod.quantity}">0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: RECENT PRODUCTS -->
+      <div class="card">
+        <div class="card-header">🆕 Recently Added Products (Last 5)</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="p : ${recentProducts}">
+                <td th:text="${p.id}">1</td>
+                <td th:text="${p.name}">Product</td>
+                <td th:text="${p.category}">Category</td>
+                <td th:text="${'$' + p.price}">$0</td>
+                <td th:text="${p.quantity}">0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="text-center" style="text-align: center">
+        <a href="/products" class="btn-back">← Back to Product List</a>
+      </div>
+    </div>
+  </body>
+</html>

@@ -98,4 +98,36 @@ public class ProductServiceImp implements ProductService {
     public List<String> getAllCategories() {
         return productRepository.findAllCategories();
     }
+
+    @Override
+    public long getCountByCategory(String category) {
+        return productRepository.countByCategory(category);
+    }
+
+    @Override
+    public BigDecimal getTotalValue() {
+        BigDecimal value = productRepository.calculateTotalValue();
+        return value != null ? value : BigDecimal.ZERO;
+    }
+
+    @Override
+    public BigDecimal getAveragePrice() {
+        BigDecimal avg = productRepository.calculateAveragePrice();
+        return avg != null ? avg : BigDecimal.ZERO;
+    }
+
+    @Override
+    public List<Product> getLowStockProducts(int threshold) {
+        return productRepository.findLowStockProducts(threshold);
+    }
+
+    @Override
+    public List<Product> getRecentProducts() {
+        return productRepository.findTop5ByOrderByIdDesc();
+    }
+
+    @Override
+    public long getTotalProductsCount() {
+        return productRepository.count();
+    }
 }
