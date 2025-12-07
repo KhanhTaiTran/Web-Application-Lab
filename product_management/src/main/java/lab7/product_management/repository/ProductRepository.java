@@ -30,10 +30,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                         "LOWER(p.name) LIKE LOWER(:name) AND " +
                         "LOWER(p.category) LIKE LOWER(:category) AND " +
                         "p.price BETWEEN :minPrice AND :maxPrice")
-        List<Product> searchProducts(@Param("name") String name,
+        Page<Product> searchProducts(@Param("name") String name,
                         @Param("category") String category,
                         @Param("minPrice") BigDecimal minPrice,
-                        @Param("maxPrice") BigDecimal maxPrice);
+                        @Param("maxPrice") BigDecimal maxPrice,
+                        Pageable pageable);
 
         @Query("SELECT DISTINCT p.category FROM Product p ORDER BY p.category")
         List<String> findAllCategories();

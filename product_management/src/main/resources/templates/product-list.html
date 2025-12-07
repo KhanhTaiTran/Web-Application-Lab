@@ -196,22 +196,27 @@
         </form>
 
         <form
-          th:action="@{/products}"
+          title="getByCategory"
+          th:action="@{/products/advanced-search}"
           method="get"
           style="display: flex; gap: 10px"
         >
+          <input
+            type="hidden"
+            name="name"
+            th:value="${name != null ? name : keyword}"
+          />
           <select
-            title="Select Categories"
+            title="categoryFilter"
             name="category"
             onchange="this.form.submit()"
-            style="padding: 10px; border: 1px solid #ddd; border-radius: 5px"
           >
             <option value="">All Categories</option>
             <option
               th:each="cat : ${categories}"
               th:value="${cat}"
               th:text="${cat}"
-              th:selected="${cat == selectedCategory}"
+              th:selected="${cat == category}"
             ></option>
           </select>
         </form>
@@ -222,11 +227,61 @@
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Quantity</th>
+              <th>
+                <a
+                  th:href="@{/products(sortBy='id',sortDir=${sortDir=='asc'?'desc':'asc'})}"
+                >
+                  ID
+                </a>
+                <span
+                  th:if="${sortBy=='id'}"
+                  th:text="${sortDir=='asc'?'↑':'↓'}"
+                ></span>
+              </th>
+              <th>
+                <a
+                  th:href="@{/products(sortBy='productCode',sortDir=${sortDir=='asc'?'desc':'asc'})}"
+                >
+                  Product Code
+                  <span
+                    th:if="${sortBy=='productCode'}"
+                    th:text="${sortDir=='asc'?'↑':'↓'}"
+                  ></span>
+                </a>
+              </th>
+              <th>
+                <a
+                  th:href="@{/products(sortBy='name',sortDir=${sortDir=='asc'?'desc':'asc'})}"
+                >
+                  Name
+                  <span
+                    th:if="${sortBy=='name'}"
+                    th:text="${sortDir=='asc'?'↑':'↓'}"
+                  ></span>
+                </a>
+              </th>
+              <th>
+                <a
+                  th:href="@{/products(sortBy='price',sortDir=${sortDir=='asc'?'desc':'asc'})}"
+                >
+                  Price
+                  <span
+                    th:if="${sortBy=='price'}"
+                    th:text="${sortDir=='asc'?'↑':'↓'}"
+                  ></span>
+                </a>
+              </th>
+              <th>
+                <a
+                  th:href="@{/products(sortBy='quantity',sortDir=${sortDir=='asc'?'desc':'asc'})}"
+                >
+                  Quantity
+                  <span
+                    th:if="${sortBy=='quantity'}"
+                    th:text="${sortDir=='asc'?'↑':'↓'}"
+                  ></span>
+                </a>
+              </th>
               <th>Category</th>
               <th>Actions</th>
             </tr>
@@ -272,7 +327,13 @@
             <!-- Previous Button -->
             <a
               th:if="${currentPage > 0}"
-              th:href="@{/products/search(keyword=${keyword}, page=${currentPage - 1}, size=10)}"
+              th:href="@{${baseUrl}(
+                   page=${currentPage - 1},
+                   keyword=${keyword},
+                   name=${name},
+                   category=${category},
+                   minPrice=${minPrice},
+                   maxPrice=${maxPrice})}"
               class="btn btn-sm btn-primary"
             >
               ← Previous
@@ -295,7 +356,14 @@
               </a>
               <a
                 th:unless="${i == currentPage}"
-                th:href="@{/products/search(keyword=${keyword}, page=${i}, size=10)}"
+                th:href="@{${baseUrl}(
+                   page=${i},
+                   keyword=${keyword},
+                   name=${name},
+                   category=${category},
+                   minPrice=${minPrice},
+                   maxPrice=${maxPrice}
+               )}"
                 style="
                   padding: 5px 10px;
                   background: #f5f5f5;
@@ -311,7 +379,14 @@
             <!-- Next Button -->
             <a
               th:if="${currentPage < totalPages - 1}"
-              th:href="@{/products/search(keyword=${keyword}, page=${currentPage + 1}, size=10)}"
+              th:href="@{${baseUrl}(
+                   page=${currentPage + 1},
+                   keyword=${keyword},
+                   name=${name},
+                   category=${category},
+                   minPrice=${minPrice},
+                   maxPrice=${maxPrice}
+               )}"
               class="btn btn-sm btn-primary"
             >
               Next →

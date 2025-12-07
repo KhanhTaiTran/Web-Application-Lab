@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.data.domain.Page;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.math.BigDecimal;
@@ -27,22 +28,29 @@ public class ProductController {
 
     // List all products
     @GetMapping
-    public String listProducts(@RequestParam(required = false) String category, Model model) {
-        List<Product> products;
+    public String listProducts(
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
 
-        if (category != null && !category.trim().isEmpty()) {
-            products = productService.getProductsByCategory(category);
-            model.addAttribute("selectedCategory", category);
-        } else {
-            products = productService.getAllProducts();
-        }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Product> productPage = productService.getAllProducts(pageable);
 
         List<String> categories = productService.getAllCategories();
-
-        model.addAttribute("products", products);
         model.addAttribute("categories", categories);
 
-        return "product-list"; // return to product-list.html
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("totalItems", productPage.getTotalElements());
+
+        return "product-list";
     }
 
     @GetMapping("/new")
@@ -124,13 +132,21 @@ public class ProductController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             Model model) {
-        List<Product> products = productService.advancedSearch(name, category, minPrice, maxPrice);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Product> productPage = productService.advancedSearch(name, category, minPrice, maxPrice, pageable);
 
         List<String> categories = productService.getAllCategories();
         model.addAttribute("categories", categories);
 
-        model.addAttribute("products", products);
+        // pagination
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("totalItems", productPage.getTotalElements());
+
+        model.addAttribute("products", productPage.getContent());
         model.addAttribute("name", name);
         model.addAttribute("category", category);
         model.addAttribute("minPrice", minPrice);

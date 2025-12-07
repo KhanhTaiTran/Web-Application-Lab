@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,16 @@ public class ProductServiceImp implements ProductService {
     @Override
     public List<Product> getAllProducts() {
         return productRepository.findAll();
+    }
+
+    @Override
+    public List<Product> getAllProducts(Sort sort) {
+        return productRepository.findAll(sort);
+    }
+
+    @Override
+    public Page<Product> getAllProducts(Pageable pageable) {
+        return productRepository.findAll(pageable);
     }
 
     @Override
@@ -57,15 +68,15 @@ public class ProductServiceImp implements ProductService {
     }
 
     @Override
-    public List<Product> advancedSearch(String name, String category, BigDecimal minPrice,
-            BigDecimal maxPrice) {
+    public Page<Product> advancedSearch(String name, String category, BigDecimal minPrice,
+            BigDecimal maxPrice, Pageable pageable) {
         // convert empty string to null
         name = (name != null && name.trim().isEmpty()) ? null : name;
         category = (category != null && category.trim().isEmpty()) ? null : category;
 
         // if all parameters are null, return all products
         if (name == null && category == null && minPrice == null && maxPrice == null) {
-            return productRepository.findAll();
+            return productRepository.findAll(pageable);
         }
 
         // build dynamic query
@@ -80,7 +91,7 @@ public class ProductServiceImp implements ProductService {
         String namePattern = (name != null) ? "%" + name + "%" : "%";
         String categoryPattern = (category != null) ? "%" + category + "%" : "%";
 
-        return productRepository.searchProducts(namePattern, categoryPattern, minPrice, maxPrice);
+        return productRepository.searchProducts(namePattern, categoryPattern, minPrice, maxPrice, pageable);
     }
 
     @Override
