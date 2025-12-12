@@ -60,4 +60,18 @@ public class AuthController {
         response.put("message", "Password changed successfully.");
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String token = userService.generateResetToken(email);
+
+        return ResponseEntity.ok("Reset token: " + token);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+        userService.resetPassword(request.getResetToken(), request.getNewPassword());
+        return ResponseEntity.ok("Password has been reset successfully.");
+    }
 }

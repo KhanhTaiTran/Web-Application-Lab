@@ -7,6 +7,10 @@ import com.example.secure_customer_api.exception.DuplicateResourceException;
 import com.example.secure_customer_api.exception.ResourceNotFoundException;
 import com.example.secure_customer_api.repository.UserRepository;
 import com.example.secure_customer_api.security.JwtTokenProvider;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -110,6 +114,49 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
         // save user
+        userRepository.save(user);
+    }
+
+    @Override
+    public String generateResetToken(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email:" + email));
+
+        String resetToken = UUID.randomUUID().toString();
+
+        user.setResetToken(resetToken);
+        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1)); // token valid for 1 hour
+
+        userRepository.save(user);
+
+        return resetToken;
+    }
+
+    @Override
+    public void resetPassword(String resetToken, String newPassword) {
+        if (resetToken == null || resetToken.trim().isEmpty()) {
+            throw new RuntimeException("Reset token is required");
+        }
+
+        String token = resetToken.trim();
+
+        // find user by reset token
+        User user = userRepository.findByResetToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid reset token"));
+
+        // check if token is expired (null-safe)
+        if (user.getResetTokenExpiry() == null || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Reset token has expired");
+        }
+
+        // update pass
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // clear reset token and expiry
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+
+        // save
         userRepository.save(user);
     }
 

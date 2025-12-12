@@ -15,4 +15,10 @@ public interface UserService {
     UserResponseDTO getCurrentUser(String username);
 
     void changePassword(String username, ChangePasswordDTO changePasswordDTO);
+
+    // forgot pass
+    String generateResetToken(String email);
+
+    // reset pass
+    void resetPassword(String resetToken, String newPassword);
 }
