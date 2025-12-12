@@ -4,6 +4,7 @@ import com.example.secure_customer_api.dto.LoginRequestDTO;
 import com.example.secure_customer_api.dto.LoginResponseDTO;
 import com.example.secure_customer_api.dto.RegisterRequestDTO;
 import com.example.secure_customer_api.dto.UserResponseDTO;
+import com.example.secure_customer_api.dto.ChangePasswordDTO;
 
 public interface UserService {
 
@@ -12,4 +13,6 @@ public interface UserService {
     UserResponseDTO register(RegisterRequestDTO registerRequest);
 
     UserResponseDTO getCurrentUser(String username);
+
+    void changePassword(String username, ChangePasswordDTO changePasswordDTO);
 }

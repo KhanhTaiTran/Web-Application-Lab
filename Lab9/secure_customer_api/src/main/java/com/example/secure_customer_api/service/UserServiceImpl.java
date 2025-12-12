@@ -90,6 +90,29 @@ public class UserServiceImpl implements UserService {
         return convertToDTO(user);
     }
 
+    @Override
+    public void changePassword(String username, ChangePasswordDTO request) {
+
+        // take user from db
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // verify current pass
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        // check new pass and confirm pass
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("New password and confirm password do not match");
+        }
+
+        // hash new pass and set to user
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // save user
+        userRepository.save(user);
+    }
+
     private UserResponseDTO convertToDTO(User user) {
         return new UserResponseDTO(
                 user.getId(),

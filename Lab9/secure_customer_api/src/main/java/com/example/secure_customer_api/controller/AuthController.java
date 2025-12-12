@@ -49,4 +49,15 @@ public class AuthController {
         response.put("message", "Logged out successfully. Please remove token from client.");
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        userService.changePassword(username, changePasswordDTO);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Password changed successfully.");
+        return ResponseEntity.ok(response);
+    }
 }
