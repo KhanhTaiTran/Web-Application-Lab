@@ -160,6 +160,58 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
+    public UserResponseDTO getUserProfile(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // map entity to dto
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole().name())
+                .isActive(user.getIsActive())
+                .createdAt(user.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public UserResponseDTO updateUserProfile(String username, UpdateProfileDTO updateProfileDTO) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setFullName(updateProfileDTO.getFullName());
+        user.setEmail(updateProfileDTO.getEmail());
+
+        // save
+        User updateUser = userRepository.save(user);
+
+        return UserResponseDTO.builder()
+                .id(updateUser.getId())
+                .username(updateUser.getUsername())
+                .email(updateUser.getEmail())
+                .fullName(updateUser.getFullName())
+                .role(updateUser.getRole().name())
+                .isActive(updateUser.getIsActive())
+                .createdAt(updateUser.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public void deleteAccount(String username, String rawPassword) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // verify pass
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new RuntimeException("Incorect password");
+        }
+
+        // delete user (set isActive = false)
+        user.setIsActive(false);
+
+        userRepository.save(user);
+    }
+
     private UserResponseDTO convertToDTO(User user) {
         return new UserResponseDTO(
                 user.getId(),

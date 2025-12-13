@@ -2,6 +2,9 @@ package com.example.secure_customer_api.dto;
 
 import java.time.LocalDateTime;
 
+import lombok.Builder;
+
+@Builder
 public class UserResponseDTO {
 
     private Long id;
