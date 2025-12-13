@@ -10,6 +10,8 @@ import com.example.secure_customer_api.security.JwtTokenProvider;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -165,15 +167,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
         // map entity to dto
-        return UserResponseDTO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .role(user.getRole().name())
-                .isActive(user.getIsActive())
-                .createdAt(user.getCreatedAt())
-                .build();
+        return convertToDTO(user);
     }
 
     @Override
@@ -186,15 +180,7 @@ public class UserServiceImpl implements UserService {
         // save
         User updateUser = userRepository.save(user);
 
-        return UserResponseDTO.builder()
-                .id(updateUser.getId())
-                .username(updateUser.getUsername())
-                .email(updateUser.getEmail())
-                .fullName(updateUser.getFullName())
-                .role(updateUser.getRole().name())
-                .isActive(updateUser.getIsActive())
-                .createdAt(updateUser.getCreatedAt())
-                .build();
+        return convertToDTO(updateUser);
     }
 
     @Override
@@ -210,6 +196,35 @@ public class UserServiceImpl implements UserService {
         user.setIsActive(false);
 
         userRepository.save(user);
+    }
+
+    @Override
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> convertToDTO(user))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserResponseDTO updateUserRole(Long userId, Role newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setRole(newRole);
+        User updatedUser = userRepository.save(user);
+
+        return convertToDTO(updatedUser);
+    }
+
+    @Override
+    public UserResponseDTO toggleUserStatus(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setIsActive(!user.getIsActive());
+        User updatedUser = userRepository.save(user);
+
+        return convertToDTO(updatedUser);
     }
 
     private UserResponseDTO convertToDTO(User user) {

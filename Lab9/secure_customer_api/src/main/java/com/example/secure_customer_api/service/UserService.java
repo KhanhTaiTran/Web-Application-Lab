@@ -7,6 +7,9 @@ import com.example.secure_customer_api.dto.UpdateProfileDTO;
 import com.example.secure_customer_api.dto.UserResponseDTO;
 import com.example.secure_customer_api.dto.ChangePasswordDTO;
 
+import com.example.secure_customer_api.entity.Role;
+import java.util.List;
+
 public interface UserService {
 
     LoginResponseDTO login(LoginRequestDTO loginRequest);
@@ -28,4 +31,10 @@ public interface UserService {
     UserResponseDTO updateUserProfile(String username, UpdateProfileDTO updateProfileDTO);
 
     void deleteAccount(String username, String rawPassword);
+
+    List<UserResponseDTO> getAllUsers();
+
+    UserResponseDTO updateUserRole(Long userId, Role newRole);
+
+    UserResponseDTO toggleUserStatus(Long userId);
 }
